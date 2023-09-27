@@ -167,7 +167,7 @@ def update(old_version):
 
 # Variaveis
 cache = diskcache.Cache('~/.cache/nav/save.temp')
-VERSION = '0.1.6'
+VERSION = '0.1.7'
 
 os.system("clear")
 print("\033[2J\n", end="")
@@ -185,6 +185,8 @@ print(Fore.WHITE + 'Navigation and Verification © copyright - 2022 ~ 2023')
 
 # Class
 userClass = User()
+userClass.login()
+
 oltClass = Olt()
 toolsClass = Tools()
 bbClass = Blockbit()
@@ -208,7 +210,6 @@ if version != VERSION:
     print('\n* Adicionado nova forma de leitura de comandos blockbit.')
     print('\n* Corrigido alguns bug de travamente.', Style.RESET_ALL)
 
-userClass.login()
 
 USER = cache.get('username').title().split('.')
 ACCESS = cache.get('access')
