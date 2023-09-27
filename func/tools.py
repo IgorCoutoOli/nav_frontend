@@ -3,6 +3,7 @@ import sys
 import diskcache, re, requests, json, threading, time, signal, socketio
 import clipboard
 from halo import Halo
+from colorama import Fore
 
 import PySimpleGUI as sg
 
@@ -219,7 +220,10 @@ class Tools:
                 for line in self.clip:
                     ask += f'{line}\n'
 
-                clipboard.copy(""+ask)
+                try:
+                    clipboard.copy(""+ask)
+                except:
+                    print(Fore.RED+'[ERRO] Não foi encontrado o xclip, instale apt install xclip.'+Fore.RESET)
 
         window.close()
         return 2
