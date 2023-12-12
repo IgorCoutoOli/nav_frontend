@@ -16,6 +16,7 @@ class Tools:
         self.api_url = 'http://172.16.151.141:4001'
         self.ACCESS = self.cache.get('access')
         self.clip = ''
+        self.clip_code = ''
         self.LOOP = True
         self.sio = socketio.Client()
 
@@ -85,6 +86,7 @@ class Tools:
                         if linha != 'enable' and linha != '' and linha != 'conf t':
                             result_print += linha + '\n'
 
+                    self.clip_code = result_print
                     window['-box-'].update(value=result_print)
                 else:
                     result = response.json()
@@ -110,6 +112,7 @@ class Tools:
                         if line != 'enable' and line != '' and line != 'conf t':
                             result_print += line + '\n'
 
+                    self.clip_code = result_print
                     window['-box-'].update(value=result_print)
                 else:
                     window['-box-'].update(value='Removido com sucesso!')
@@ -126,7 +129,7 @@ class Tools:
             [sg.Button('Adicionar', key='-add-'), sg.Button('Remover', key='-remove-')],
             [sg.Checkbox(" Adicionar automaticamente.", key='-checkbox-', default=False)],
             [sg.Frame('Linhas do A10', [[sg.Multiline(size=(65, 20), key='-box-', disabled=True)]], key='-COL02-')],
-            [sg.Button('Copiar resposta', key='-clip-')]
+            [sg.Button('Copiar resposta', key='-clip-'), sg.Button('Copiar codigo', key='-clip_code-')]
         ]
 
         count_port = 1
@@ -222,6 +225,11 @@ class Tools:
 
                 try:
                     clipboard.copy(""+ask)
+                except:
+                    print(Fore.RED+'[ERRO] Não foi encontrado o xclip, instale apt install xclip.'+Fore.RESET)
+            elif event == '-clip_code-':
+                try:
+                    clipboard.copy(self.clip_code)
                 except:
                     print(Fore.RED+'[ERRO] Não foi encontrado o xclip, instale apt install xclip.'+Fore.RESET)
 
