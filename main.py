@@ -5,6 +5,7 @@ from func.olt import Olt
 from func.tools import Tools
 from func.bb import Blockbit
 from func.mk import MK
+from func.datacom import Datacom
 from tqdm import tqdm
 
 
@@ -54,10 +55,10 @@ def autocompletar(texto, estado):
                     'exit']
 
         if ACCESS > 2:
-            palavras += ['users-list', 'createuser', 'deleteuser', 'changeuser']
+            palavras += ['users-list', 'createuser', 'd', 'changeuser']
 
         if ACCESS > 1:
-            palavras += ['olt', 'logs', 'testasenha', 'a10']
+            palavras += ['olt', 'logs', 'testasenha', 'a10', 'datacom']
 
     opcoes = [p for p in palavras if p.startswith(texto)]
     if estado < len(opcoes):
@@ -90,11 +91,12 @@ def command(comando) -> int:
         print('\t• blockbit-connect %Id [bbc %Id] - Conecta o usuário no blockbit selecionado.')
         print('\t• blockbit-search %Pesquisa [bbs %Pesquisa] - Lista todos blockbit que temos na rede atualmente.')
         print('\t• lock - Desabilita/Habilita a saída com CTRL+C.')
-        print('\t• mk - Versão portatil do MK.')
+        print("\t• mk - Versão portatil do MK.")
         if ACCESS > 1:
             print('\t• olt s [%Pesquisa] - Procura nas logs do ultimo backup das OLT.')
             print('\t• testasenha [%IP] - Descobre a senha do rádio indicado.')
             print('\t• a10 - Abre interface para gerar ou adicionar os RDR no A10.')
+            print("\t• datacom %Pesquisa - Lista todos os datacom com o nome passado na pesquisa.")
         if ACCESS > 2:
             print('\t• logs [%Pesquisa] [%Username?] - Procura nas logs do sistema.')
             print('\t• users-list - Lista todos os usuários.')
@@ -121,12 +123,15 @@ def command(comando) -> int:
         return bbClass.connect(comando)
     if comando.startswith('bbs') or comando.startswith('blockbit-search'):
         return bbClass.search(comando)
+    if comando.startswith('datacom'):
+        return datacomClass.search(comando)
 
 
 def update(old_version):
     try:
         api_url = 'http://172.16.151.141:4001'
         response = requests.get(f'{api_url}/version.txt')
+        print(sys.argv[0])
 
         if response.status_code == 200:
             new_version = response.text.split("\n")[0].strip()
@@ -135,7 +140,7 @@ def update(old_version):
                 print(
                     Fore.WHITE + f'Version: ' + Fore.RED + old_version + ' -> ' + Fore.GREEN + new_version + Fore.YELLOW)
                 url_arquivo = f'{api_url}/nav'
-                caminho_local = os.path.dirname(os.path.abspath(sys.argv[0])) + '/nav'
+                caminho_local = os.path.dirname(os.path.abspath(sys.argv[0])) + sys.argv[0].replace('.', '')
                 caminho_novo = caminho_local + '.new'
                 response = requests.get(url_arquivo, stream=True)
                 tamanho_arquivo = int(response.headers.get("Content-Length", 0))
@@ -167,7 +172,7 @@ def update(old_version):
 
 # Variaveis
 cache = diskcache.Cache('~/.cache/nav/save.temp')
-VERSION = '0.1.7'
+VERSION = '0.1.9'
 
 os.system("clear")
 print("\033[2J\n", end="")
@@ -191,6 +196,7 @@ oltClass = Olt()
 toolsClass = Tools()
 bbClass = Blockbit()
 mkClass = MK()
+datacomClass = Datacom()
 
 if update(VERSION) == 1:
     print(Fore.WHITE + 'Terminal atualizado com sucesso.')
@@ -200,16 +206,12 @@ version = cache.get('version')
 
 if version != VERSION:
     cache['version'] = VERSION
-    print(Fore.BLUE + '\n----- Changelog version 0.1.7 -----', Fore.RESET)
-    print(Style.BRIGHT + '\n* Refeito todo conjunto de ligação do aplicativo.')
-    print('\n* Refeito leitura do testa senha nos rádios.')
-    print('\n* Optimizado comunicação com API')
-    print('\n* Adicionado mk portable.')
-    print('\n* Adicionado função a10 para gerar script ou adicionar diretamente.')
-    print('\n* Adicionado nova forma de puxar os backup das olt para o olt s.')
-    print('\n* Adicionado nova forma de leitura de comandos blockbit.')
-    print('\n* Corrigido alguns bug de travamente.', Style.RESET_ALL)
-
+    print(Fore.BLUE + '\n----- Changelog version 0.1.9 -----', Fore.RESET)
+    print(Style.BRIGHT + '\n* Adicionado opção para copiar código gerado no A10.')
+    print(Style.BRIGHT + '\n* Adicionado comando para listar datacom registrados.')
+    print(Style.BRIGHT + '\n* Refeito sistema de login; é necessário solicitar novo acesso ao NOC.')
+    print(Style.BRIGHT + '\n* Corrigido algumas inconsistências na busca do olt s.')
+    print('\n* Corrigido alguns problemas no processo de atualização.', Style.RESET_ALL)
 
 USER = cache.get('username').title().split('.')
 ACCESS = cache.get('access')
