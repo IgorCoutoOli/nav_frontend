@@ -140,8 +140,10 @@ def update(old_version):
                 print(
                     Fore.WHITE + f'Version: ' + Fore.RED + old_version + ' -> ' + Fore.GREEN + new_version + Fore.YELLOW)
                 url_arquivo = f'{api_url}/nav'
-                caminho_local = os.path.dirname(os.path.abspath(sys.argv[0])) + sys.argv[0].replace('.', '')
-                caminho_novo = caminho_local + '.new'
+
+                caminho_local = sys.argv[0]
+
+                caminho_novo = sys.argv[0] + '.new'
                 response = requests.get(url_arquivo, stream=True)
                 tamanho_arquivo = int(response.headers.get("Content-Length", 0))
                 try:
@@ -151,7 +153,6 @@ def update(old_version):
                                 if chunk:
                                     arquivo.write(chunk)
                                     barra_progresso.update(len(chunk))
-
                     time.sleep(2)
                     shutil.move(caminho_local, caminho_local + '.bak')
                     shutil.move(caminho_novo, caminho_local)
