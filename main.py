@@ -55,7 +55,7 @@ def autocompletar(texto, estado):
                     'exit']
 
         if ACCESS > 2:
-            palavras += ['users-list', 'createuser', 'd', 'changeuser']
+            palavras += ['users-list', 'createuser', 'changeuser']
 
         if ACCESS > 1:
             palavras += ['olt', 'logs', 'testasenha', 'a10', 'datacom']
@@ -131,7 +131,6 @@ def update(old_version):
     try:
         api_url = 'http://172.16.151.141:4001'
         response = requests.get(f'{api_url}/version.txt')
-        print(sys.argv[0])
 
         if response.status_code == 200:
             new_version = response.text.split("\n")[0].strip()
@@ -173,7 +172,7 @@ def update(old_version):
 
 # Variaveis
 cache = diskcache.Cache('~/.cache/nav/save.temp')
-VERSION = '0.1.9'
+VERSION = '0.2.0'
 
 os.system("clear")
 print("\033[2J\n", end="")
@@ -187,7 +186,7 @@ background = '''
 '''.split('\n')
 background_print = "\n".join(filter(lambda linha: linha.strip(), background))
 print(Fore.GREEN + Style.BRIGHT + background_print)
-print(Fore.WHITE + 'Navigation and Verification © copyright - 2022 ~ 2023')
+print(Fore.WHITE + 'Navigation and Verification © copyright - 2022 ~ 2024')
 
 # Class
 userClass = User()
@@ -207,12 +206,10 @@ version = cache.get('version')
 
 if version != VERSION:
     cache['version'] = VERSION
-    print(Fore.BLUE + '\n----- Changelog version 0.1.9 -----', Fore.RESET)
-    print(Style.BRIGHT + '\n* Adicionado opção para copiar código gerado no A10.')
-    print(Style.BRIGHT + '\n* Adicionado comando para listar datacom registrados.')
-    print(Style.BRIGHT + '\n* Refeito sistema de login; é necessário solicitar novo acesso ao NOC.')
-    print(Style.BRIGHT + '\n* Corrigido algumas inconsistências na busca do olt s.')
-    print('\n* Corrigido alguns problemas no processo de atualização.', Style.RESET_ALL)
+    print(Fore.BLUE + '\n----- Changelog version 0.2.1 -----', Fore.RESET)
+    print(Style.BRIGHT + '\n* Corrigido aviso da função de adicionar automaticamente do a10.')
+    print('\n* Corrigido alguns problemas no processo de atualização.')
+    print('\n* Adicionado função "r" no comando mk para registrar novos equipamento sem precisar acessa-lo. Exemplo: mk r ip nome\n', Style.RESET_ALL)
 
 USER = cache.get('username').title().split('.')
 ACCESS = cache.get('access')
