@@ -24,7 +24,7 @@ class MK:
         search = re.findall(r'"([^"]*)"|(\S+)', command)
         result = [pair[0] or pair[1] for pair in search if not pair[1].startswith('-')]
 
-        if len(result) < 3:
+        if len(result) < 3 or result[1] == 'r' and len(result) < 4:
             if len(search) < 2:
                 return self.help()
 
@@ -32,7 +32,7 @@ class MK:
                 return self.help()
 
             print('Error: unknown command "d" for "mk"\n'
-                  'Você não quis dizer mk a, mk i ou mk s?\n'
+                  'Você não quis dizer mk a, mk i, mk r ou mk s?\n'
                   'Aprenda a usar usando mk -h ou mk --help')
             return 2
 
@@ -66,6 +66,7 @@ class MK:
             except subprocess.CalledProcessError as e:
                 print("Erro ao executar o comando SSH: ", e.output)
 
+        # Adotando equipamento.
         if result[1] == 'a':
             if validate_ip(result[2]) is None:
                 print(Fore.RED + 'Informe um IP válido' + Fore.RESET)
@@ -82,11 +83,40 @@ class MK:
             print("Routerboard adotada com sucesso.")
             return 2
 
+        # Registrando equipamento sem precisar adotar.
+        if result[1] == 'r':
+            if validate_ip(result[2]) is None:
+                print(Fore.RED + 'Informe um IP válido' + Fore.RESET)
+                return 2
+            
+            if result[3] is None or result[3] == "":
+                print(Fore.RED + 'Informe um nome para registrar equipamento' + Fore.RESET)
+                return 2
+            
+            spinner = Halo(text="Registrando equipamento...", spinner="dots")
+            spinner.start()
+
+            data = {
+                'token': self.token,
+                'ip': result[2],
+                'identify': result[3],
+                'secret': dados
+            }            
+            response = requests.post(f'{self.api_url}/mk/register', data=json.dumps(data), headers=self.headers)
+            spinner.stop()
+            
+            if response.status_code == 200:
+                print('Equipamento registrado com sucesso com a senha ' + Fore.GREEN + response.json() + Fore.RESET)
+            else:
+                print('Não foi possivel adicionar equipamento.')
+            return 2
+
         flags = {
             'backup': False,
             'inactive': False,
             'reset': False,
             'senha': False,
+            'equipament': False,
         }
 
         if '-b' in command or '--backup' in command:
@@ -146,8 +176,7 @@ class MK:
                     break
 
             if selected_routerboard is None:
-                print("ID inválido.")
-                return 2
+                selected_routerboard = rbs[0]
 
             return selected_routerboard
 
@@ -183,8 +212,9 @@ class MK:
                     return self.open_winbox(selected_ip, dados['radius_user'], dados['radius_password'],
                                             os.path.expanduser(dados['winbox_path']), dados['windows'])
                 else:
-                    print("Seleção inválida.")
-                    return 2
+                    selected_ip = rb['ips'][0]
+                    return self.open_winbox(selected_ip, dados['radius_user'], dados['radius_password'],
+                                            os.path.expanduser(dados['winbox_path']), dados['windows'])
 
         # Selecionar backup
         def backup(rb):
@@ -211,8 +241,7 @@ class MK:
                         backup_index = int(
                             input(Style.BRIGHT + "Digite o índice do Backup que deseja acessar: " + Style.RESET_ALL))
                     except:
-                        print('C^')
-                        return 2
+                        backup_index = 0
 
                     send['type'] = 1
                     send['index'] = backup_index
@@ -221,7 +250,12 @@ class MK:
                     if res2.status_code == 200:
                         backup = res2.json()
 
-                        print(f'\n{backup}')
+                        savefile = f"./backup-MK/{rb['identity']}.txt"
+                        os.makedirs(os.path.dirname(savefile), exist_ok=True)
+                        with open(savefile, "w") as f:
+                            f.write(backup)
+                            
+                        print(savefile)
 
                 return 2
 
@@ -289,6 +323,7 @@ class MK:
               "  a\tPermite adotar uma routerboard informando o IP da mesma. Exemplo: mk a 192.168.0.1\n"
               "  i\tAcessa uma routerboard pelo id. Exemplo: mk i 1234\n"
               "  s\tRealiza uma busca por routerboards. Exemplo: mk s 'Tergrasa CE' ou mk s 172.16.20.168\n\n"
+              "  r\tPermite que adote uma routerboard sem ela estar online, mas apenas funciona nessa versão do mk. Exemplo: mk r 172.16.20.168 'Tergrasa CE'\n\n"
               "Flags:\n"
               "  -b, --backup\t\tLista os últimos 10 backups de uma Routerboard e permite selecionar um deles para download.\n"
               "  \t\t\tExemplo:\n"
