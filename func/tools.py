@@ -209,7 +209,7 @@ class Tools:
                         if event in (sg.WIN_CLOSED, 'Exit', 'Cancel') or event == '-recuse-':
                             break
                         if event == '-accept-':
-                            print('Removendo... Aguarde!')
+                            window['-box-'].update(value='Removendo... Aguarde!')
                             popup.Close()
                             removing(values)
                             break
