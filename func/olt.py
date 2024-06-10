@@ -58,6 +58,8 @@ class Olt:
                 flags['olt'] = '37'
             elif '38' in pesquisa:
                 flags['olt'] = '38'
+            elif '39' in pesquisa:
+                flags['olt'] = '39'
             else:
                 print(Back.RED + 'Informe uma olt na sua pesquisa. Exemplo olt s Pequisa OLT -o.' + Back.RESET)
                 return 2
@@ -91,7 +93,7 @@ class Olt:
         return 2
 
     def find(self, search, flags) -> int:
-        olt = ['23', '24', '25', '34', '35', '36', '37', '38']
+        olt = ['23', '24', '25', '34', '35', '36', '37', '38', '39']
         c = False
 
         for i in olt:
@@ -129,6 +131,7 @@ class Olt:
             result = response.text.replace('\\n', '\n').rstrip()
 
             if result == '"109"':
+                print(Fore.BLUE + f'Pesquisa OLT {olt}' + Fore.WHITE)
                 print(Fore.RED+'Não foi possivel ler backup da OLT.')
                 return 'exit'
             else:
